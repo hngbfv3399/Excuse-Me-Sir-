@@ -1,15 +1,34 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import socket from "./hooks/useSocket";
 import Login from "./components/Login";
 import Lobby from "./components/Lobby";
 import GameCanvas from "./components/GameCanvas";
 import "./App.css";
 
+const GAME_W = 800;
+const GAME_H = 600;
+
+function useScale() {
+  const [scale, setScale] = useState(1);
+  useEffect(() => {
+    function calc() {
+      const sw = window.innerWidth;
+      const sh = window.innerHeight;
+      setScale(Math.min(sw / GAME_W, sh / GAME_H, 1));
+    }
+    calc();
+    window.addEventListener("resize", calc);
+    return () => window.removeEventListener("resize", calc);
+  }, []);
+  return scale;
+}
+
 function App() {
   const [screen, setScreen] = useState("LOGIN"); 
   const [nickname, setNickname] = useState("");
   const [roomId, setRoomId] = useState("");
   const [roomData, setRoomData] = useState(null);
+  const scale = useScale();
 
   const handleLogin = (name) => {
     setNickname(name);
@@ -33,28 +52,36 @@ function App() {
   return (
     <>
       <style>
-        {`body { margin: 0; background-color: #1e1e1e; font-family: 'Inter', sans-serif; }`}
+        {`
+          *, *::before, *::after { box-sizing: border-box; }
+          html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; }
+          body { 
+            background-color: #0a0a0c; 
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100dvh;
+          }
+          #root { display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }
+        `}
       </style>
-      
-      {screen === "LOGIN" && <Login onLogin={handleLogin} />}
-      {screen === "LOBBY" && <Lobby nickname={nickname} onJoinSuccess={handleJoinSuccess} />}
-      {screen === "INGAME" && (
-        <div style={{ position: "relative", width: "100vw", height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-          
-          <GameCanvas initialRoomData={roomData} />
-          
-          <button 
-            onClick={handleLeaveRoom}
-            style={{
-              position:"absolute", top: 20, left: 20, padding: "10px 20px", backgroundColor: "rgba(255,255,255,0.9)",
-              border: "none", borderRadius: "8px", cursor: "pointer", fontWeight: "bold", fontSize: "14px",
-              boxShadow: "0 4px 10px rgba(0,0,0,0.2)", zIndex: 100
-            }}
-          >
-            ← 로비로 나가기
-          </button>
-        </div>
-      )}
+
+      {/* 반응형 아케이드 프레임: scale로 어떤 화면에서도 800x600 비율 유지 */}
+      <div style={{
+        width: `${GAME_W}px`,
+        height: `${GAME_H}px`,
+        transform: `scale(${scale})`,
+        transformOrigin: "center center",
+        backgroundColor: "#1e1e1e",
+        position: "relative",
+        borderRadius: "16px",
+        overflow: "hidden",
+        border: "4px solid #444",
+        boxShadow: "0 0 50px rgba(0,0,0,0.8)",
+        flexShrink: 0,
+      }}>
+        {screen === "LOGIN" && <Login onLogin={handleLogin} />}
+        {screen === "LOBBY" && <Lobby nickname={nickname} onJoinSuccess={handleJoinSuccess} />}
+        {screen === "INGAME" && <GameCanvas initialRoomData={roomData} onLeave={handleLeaveRoom} />}
+      </div>
     </>
   );
 }

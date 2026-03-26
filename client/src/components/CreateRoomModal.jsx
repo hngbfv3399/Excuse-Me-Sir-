@@ -3,6 +3,7 @@ import { useState } from "react";
 export default function CreateRoomModal({ onClose, onCreate }) {
   const [title, setTitle] = useState("");
   const [maxPlayers, setMaxPlayers] = useState(4);
+  const [targetQuota, setTargetQuota] = useState(2);
   const [isPrivate, setIsPrivate] = useState(false);
   const [password, setPassword] = useState("");
 
@@ -11,7 +12,7 @@ export default function CreateRoomModal({ onClose, onCreate }) {
     if (title.trim() === "") return alert("방 제목을 입력해주세요!");
     if (isPrivate && password.trim() === "") return alert("비밀번호를 입력해야 합니다!");
     
-    onCreate({ title, maxPlayers, isPrivate, password });
+    onCreate({ title, maxPlayers, targetQuota, isPrivate, password });
   };
 
   return (
@@ -24,8 +25,23 @@ export default function CreateRoomModal({ onClose, onCreate }) {
             <input type="text" value={title} onChange={e => setTitle(e.target.value)} autoFocus style={styles.input} maxLength={20} />
           </div>
           <div style={styles.field}>
-            <label>최대 인원 ({maxPlayers}명)</label>
-            <input type="range" min="2" max="8" value={maxPlayers} onChange={e => setMaxPlayers(e.target.value)} />
+            <label>최대 인원 및 팀 구성</label>
+            <select style={styles.input} value={maxPlayers} onChange={e => setMaxPlayers(parseInt(e.target.value))}>
+              <option value={2}>1 vs 1 (총 2명)</option>
+              <option value={4}>2 vs 2 (총 4명)</option>
+              <option value={6}>3 vs 3 (총 6명)</option>
+              <option value={8}>4 vs 4 (총 8명)</option>
+              <option value={10}>5 vs 5 (총 10명)</option>
+            </select>
+          </div>
+          <div style={styles.field}>
+            <label>1인당 목표 금괴 (기본: 2개)</label>
+            <select style={styles.input} value={targetQuota} onChange={e => setTargetQuota(e.target.value)}>
+              <option value={1}>1개 (빠른 모드)</option>
+              <option value={2}>2개 (보통)</option>
+              <option value={3}>3개 (어려움)</option>
+              <option value={4}>4개 (매우 어려움)</option>
+            </select>
           </div>
           <div style={styles.fieldRow}>
             <label style={{display: "flex", alignItems: "center", gap: "8px", cursor: "pointer", userSelect: "none"}}>
@@ -51,7 +67,7 @@ export default function CreateRoomModal({ onClose, onCreate }) {
 
 const styles = {
   overlay: {
-    position: "fixed", top: 0, left: 0, right: 0, bottom: 0, 
+    position: "absolute", top: 0, left: 0, right: 0, bottom: 0, 
     backgroundColor: "rgba(0,0,0,0.6)", display: "flex", 
     justifyContent: "center", alignItems: "center", zIndex: 1000, backdropFilter: "blur(3px)"
   },
