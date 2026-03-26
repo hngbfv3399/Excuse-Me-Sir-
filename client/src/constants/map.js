@@ -4,7 +4,8 @@ export const TILE = {
   FLOOR: 0,
   WALL: 1,
   SAFE_FLOOR: 2, // 🟩 안전 구역 (빈민촌)
-  JAIL: 3        // 🟪 감옥 (관아)
+  JAIL: 3,       // 🟪 감옥 (관아)
+  JAIL_DOOR: 4   // 🔒 감옥 문 (상호작용 타일)
 };
 
 export const MAP = Array.from({ length: 40 }, () => Array(40).fill(TILE.FLOOR));
@@ -56,5 +57,5 @@ for (let y = 18; y <= 22; y++) {
     }
   }
 }
-MAP[22][20] = TILE.JAIL; // 감옥 출입구 (남쪽으로 뚫어줌)
+MAP[22][20] = TILE.JAIL_DOOR; // 감옥 출입구 (자물쇠 타일, 통과 불가)
 MAP[20][20] = TILE.JAIL; // 감옥 수감 지점 중앙 확실히 청소

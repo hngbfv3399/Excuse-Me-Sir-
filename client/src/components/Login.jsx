@@ -30,11 +30,11 @@ export default function Login({ onLogin }) {
 
 const styles = {
   container: {
+    width: "100%", height: "100%",
     display: "flex", 
     justifyContent: "center", 
     alignItems: "center", 
-    height: "100vh", 
-    backgroundColor: "#1e1e1e" // 캔버스 바깥 배경색과 동일한 테마
+    backgroundColor: "#0f0f13",
   },
   card: {
     background: "rgba(255, 255, 255, 0.9)", 

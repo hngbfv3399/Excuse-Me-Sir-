@@ -50,9 +50,9 @@ export default function Lobby({ nickname, onJoinSuccess }) {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h1 style={{margin: 0, color: "white"}}>현재 열려있는 방 목록</h1>
-        <div style={{display: "flex", gap: "15px", alignItems: "center"}}>
-          <span style={{color: "#aaa", fontSize: "16px"}}>환영합니다, <b>{nickname}</b>님 👋</span>
+        <h2 style={{margin: 0, color: "white", whiteSpace: "nowrap", flex: 1}}>열려있는 방 목록</h2>
+        <div style={{display: "flex", gap: "10px", alignItems: "center"}}>
+          <span style={{color: "#aaa", fontSize: "14px"}}>환영합니다, <b>{nickname}</b>님 👋</span>
           <button onClick={() => setShowModal(true)} style={styles.createBtn}>+ 방 만들기</button>
         </div>
       </div>
@@ -99,16 +99,17 @@ export default function Lobby({ nickname, onJoinSuccess }) {
 
 const styles = {
   container: {
-    padding: "40px", backgroundColor: "#1e1e1e", minHeight: "100vh", boxSizing: "border-box"
+    width: "100%", height: "100%", padding: "20px 30px", backgroundColor: "#1e1e1e", 
+    boxSizing: "border-box", overflowY: "auto"
   },
   header: {
-    display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #333", paddingBottom: "25px", marginBottom: "30px"
+    display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #333", paddingBottom: "15px", marginBottom: "20px"
   },
   createBtn: {
     padding: "12px 24px", backgroundColor: "#FF5252", color: "white", border: "none", borderRadius: "8px", fontSize: "16px", cursor: "pointer", fontWeight: "bold", transition: "0.2s"
   },
   list: {
-    display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(400px, 1fr))", gap: "20px"
+    display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px"
   },
   emptyState: {
     gridColumn: "1 / -1", color: "white", textAlign: "center", marginTop: "80px", fontSize: "18px"
