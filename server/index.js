@@ -3,7 +3,7 @@ const express = require("express");
 const http = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const { assignItemsToPlayers, useItem } = require("./items");
+const { assignItemsToPlayers, useItem } = require("./game/items");
 const crypto = require("crypto");
 
 const app = express();

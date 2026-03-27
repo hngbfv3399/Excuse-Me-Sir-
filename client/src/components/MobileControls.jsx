@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useState, useEffect } from "react";
 
 /**
  * MobileControls
@@ -12,6 +12,15 @@ import { useRef, useCallback } from "react";
  * @param {string|null} props.inventoryItem - 현재 보유 아이템 타입
  */
 export default function MobileControls({ onJoystick, onItem, onSkill, inventoryItem }) {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent));
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const baseRef = useRef(null);
   const knobRef = useRef(null);
   const joystickState = useRef({ active: false, startX: 0, startY: 0, touchId: null });
@@ -67,6 +76,8 @@ export default function MobileControls({ onJoystick, onItem, onSkill, inventoryI
   };
 
   const itemLabel = inventoryItem ? ITEM_LABELS[inventoryItem] : null;
+
+  if (!isMobile) return null;
 
   return (
     <div style={styles.overlay}>
