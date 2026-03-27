@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import socket from "../hooks/useSocket";
 import { useKeyboard } from "../hooks/useKeyboard";
 import { isWall } from "../utils/physics";
-import { renderGame } from "../utils/render";
+import { PixiEngine } from "../renderer/engine";
 import WaitingRoom from "./WaitingRoom";
 import MobileControls from "./MobileControls";
 
@@ -14,6 +14,7 @@ export default function GameCanvas({ initialRoomData, onLeave }) {
   const [waitPlayers, setWaitPlayers] = useState(initialRoomData?.players || {});
   const [inventoryItem, setInventoryItem] = useState(null);
   const canvasRef = useRef(null);
+  const engineRef = useRef(null);
 
   const isRescuingRef = useRef(false);
   const rescueStartTimerRef = useRef(null);
@@ -141,13 +142,31 @@ export default function GameCanvas({ initialRoomData, onLeave }) {
   }, []);
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    let isCancelled = false;
+    if (isWaiting || !canvasRef.current) return;
+    
+    const engine = new PixiEngine(canvasRef.current);
+    engine.init().then(() => {
+      if (isCancelled) {
+        engine.destroy();
+      } else {
+        engineRef.current = engine;
+      }
+    });
+
+    return () => {
+      isCancelled = true;
+      if (engineRef.current) {
+        engineRef.current.destroy();
+        engineRef.current = null;
+      }
+    };
+  }, [isWaiting]);
+
+  useEffect(() => {
     let animationId;
 
     function gameLoop() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const players = playersRef.current;
       const mId = myIdRef.current;
@@ -262,7 +281,10 @@ export default function GameCanvas({ initialRoomData, onLeave }) {
         }
       });
 
-      renderGame(ctx, canvas, players, mId, itemsRef.current, trapsRef.current);
+      if (engineRef.current && engineRef.current.isInitialized) {
+        engineRef.current.update(players, mId, itemsRef.current, trapsRef.current);
+      }
+      
       animationId = requestAnimationFrame(gameLoop);
     }
 
@@ -428,7 +450,7 @@ export default function GameCanvas({ initialRoomData, onLeave }) {
       )}
 
       {/* 🎮 모바일 전용 조이스틱 + 액션 버튼 오버레이 */}
-      {timerInfo.gamePhase === "playing" && (
+      {(timerInfo.gamePhase === "playing" || timerInfo.gamePhase === "prep") && (
         <MobileControls
           onJoystick={handleJoystick}
           onItem={handleMobileItem}
