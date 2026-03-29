@@ -1,11 +1,20 @@
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
+import { useGameStore } from "../store/useGameStore";
 
 export function useGameState(socket, initialRoomData) {
-  const [roomInfo, setRoomInfo] = useState(initialRoomData);
-  const [timerInfo, setTimerInfo] = useState({ gamePhase: initialRoomData?.gamePhase || "waiting", timeLeft: 0 });
-  const [scoreInfo, setScoreInfo] = useState({ score: 0, maxScore: 1 });
-  const [waitPlayers, setWaitPlayers] = useState(initialRoomData?.players || {});
-  const [inventoryItem, setInventoryItem] = useState(null);
+  const setRoomInfo = useGameStore((state) => state.setRoomInfo);
+  const setTimerInfo = useGameStore((state) => state.setTimerInfo);
+  const setScoreInfo = useGameStore((state) => state.setScoreInfo);
+  const setWaitPlayers = useGameStore((state) => state.setWaitPlayers);
+  const setInventoryItem = useGameStore((state) => state.setInventoryItem);
+
+  useEffect(() => {
+    if (initialRoomData) {
+      setRoomInfo(initialRoomData);
+      setTimerInfo({ gamePhase: initialRoomData.gamePhase || "waiting", timeLeft: 0 });
+      setWaitPlayers(initialRoomData.players || {});
+    }
+  }, [initialRoomData, setRoomInfo, setTimerInfo, setWaitPlayers]);
 
   const playersRef = useRef({});
   const itemsRef = useRef([]);
@@ -17,14 +26,14 @@ export function useGameState(socket, initialRoomData) {
     if (socket.id) {
       myIdRef.current = socket.id;
     }
-
     socket.on("connect", () => {
       myIdRef.current = socket.id;
     });
 
     socket.on("room:info", (newInfo) => {
-      setRoomInfo((prev) => ({ ...prev, ...newInfo }));
-      setTimerInfo((prev) => ({ ...prev, gamePhase: newInfo.gamePhase || prev.gamePhase }));
+      const state = useGameStore.getState();
+      setRoomInfo({ ...state.roomInfo, ...newInfo });
+      setTimerInfo({ ...state.timerInfo, gamePhase: newInfo.gamePhase || state.timerInfo.gamePhase });
     });
 
     socket.on("game:timer", (info) => {
@@ -32,7 +41,8 @@ export function useGameState(socket, initialRoomData) {
     });
 
     socket.on("game:phase_change", (info) => {
-      setTimerInfo(prev => ({ ...prev, gamePhase: info.gamePhase, timeLeft: info.timeLeft }));
+      const state = useGameStore.getState();
+      setTimerInfo({ ...state.timerInfo, gamePhase: info.gamePhase, timeLeft: info.timeLeft });
     });
 
     socket.on("game:alert", (msg) => { alert(msg); });
@@ -116,15 +126,12 @@ export function useGameState(socket, initialRoomData) {
       socket.off("game:alert");
       socket.off("game:items_update");
       socket.off("game:score_update");
+      socket.off("game:field_items");
+      socket.off("game:traps");
     };
-  }, [initialRoomData, socket]);
+  }, [socket, setRoomInfo, setTimerInfo, setScoreInfo, setWaitPlayers, setInventoryItem]);
 
   return {
-    roomInfo, setRoomInfo,
-    timerInfo, setTimerInfo,
-    scoreInfo, setScoreInfo,
-    waitPlayers, setWaitPlayers,
-    inventoryItem, setInventoryItem,
     playersRef, itemsRef, fieldItemsRef, trapsRef, myIdRef
   };
 }

@@ -6,6 +6,7 @@ export function usePlayerPhysics(socket, playersRef, myIdRef, timerInfo, keys, s
   const joystickDirRef = useRef({ dx: 0, dy: 0 });
   const isRescuingRef = useRef(false);
   const rescueStartTimerRef = useRef(null);
+  const lastMoveTimeRef = useRef(0);
 
   const updatePhysics = () => {
     const players = playersRef.current;
@@ -108,10 +109,14 @@ export function usePlayerPhysics(socket, playersRef, myIdRef, timerInfo, keys, s
         } else break;
       }
 
-      socket.emit("player:move", {
-        x: players[mId].x,
-        y: players[mId].y,
-      });
+      const now = Date.now();
+      if (now - lastMoveTimeRef.current >= 50) {
+        socket.emit("player:move", {
+          x: players[mId].x,
+          y: players[mId].y,
+        });
+        lastMoveTimeRef.current = now;
+      }
     }
 
     // 다른 플레이어 보간 (Lerp)
