@@ -1,13 +1,18 @@
 // server/items.js
 // 게임 시작 시 각 플레이어에게 랜덤 아이템 1개를 지급하는 시스템
 
-const ITEM_TYPES = ["SPEED", "STEALTH", "TRAP"];
+const ITEMS_BY_TEAM = {
+  red: ["STEALTH", "SPEED"],  // 도망자 전용 아이템
+  blue: ["TRAP", "SPEED"]     // 술래 전용 아이템
+};
+
 const ACTIVE_DURATION = 4000;
 
-// 게임 시작 시 모든 플레이어에게 랜덤 아이템 1개씩 지급
+// 게임 시작 시 각 팀 역할에 맞는 랜덤 아이템 지급
 function assignItemsToPlayers(room) {
   Object.values(room.players).forEach((p) => {
-    const randomItem = ITEM_TYPES[Math.floor(Math.random() * ITEM_TYPES.length)];
+    const pool = ITEMS_BY_TEAM[p.team] || ["SPEED"];
+    const randomItem = pool[Math.floor(Math.random() * pool.length)];
     p.inventoryItem = randomItem;
   });
 }
