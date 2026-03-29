@@ -116,11 +116,12 @@ io.on("connection", (socket) => {
     room.players[socket.id] = {
       nickname: socketIdToNickname[socket.id] || "Guest",
       team: assignedTeam,
-      isReady: false, // 대기방 레디 상태
-      x: 240 + Math.random() * 40 - 20, // 임시 스폰
+      isReady: false, 
+      x: 240 + Math.random() * 40 - 20, 
       y: 240 + Math.random() * 40 - 20,
       isTagger: false,
       isJailed: false,
+      characterId: assignedTeam === "red" ? "DEFAULT_RUNNER" : "DEFAULT_TAGGER",
     };
 
     socket.emit("room:join:success", { roomId, room });
@@ -147,6 +148,8 @@ io.on("connection", (socket) => {
     }
 
     room.players[socket.id].team = targetTeam;
+    // 팀 변경 시 캐릭터도 해당 팀 기본 캐릭터로 변경
+    room.players[socket.id].characterId = targetTeam === "red" ? "DEFAULT_RUNNER" : "DEFAULT_TAGGER";
     io.to(roomId).emit("game:update", room.players);
   });
 
