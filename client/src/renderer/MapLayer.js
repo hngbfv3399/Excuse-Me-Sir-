@@ -13,7 +13,7 @@ const TILE_MAP = {
 };
 
 export function setupMapLayer(mapContainer, baseTexture) {
-  // 타일시트에서 16x16 조각들을 추출하기 위해 텍스처를 캐싱합니다.
+  
   const getTexture = (tx, ty) => {
     return new PIXI.Texture({
       source: baseTexture.source,
@@ -29,7 +29,7 @@ export function setupMapLayer(mapContainer, baseTexture) {
     JAIL_DOOR: getTexture(TILE_MAP.JAIL_DOOR.tx, TILE_MAP.JAIL_DOOR.ty),
   };
 
-  // 1회만 그리기 (Retained Mode)
+  
   MAP.forEach((row, y) => {
     row.forEach((tile, x) => {
       let tex = textures.FLOOR;
@@ -51,7 +51,7 @@ export function setupMapLayer(mapContainer, baseTexture) {
       
       mapContainer.addChild(sprite);
 
-      // 감옥 문 🔒 텍스트 오버레이
+      
       if (isDoor) {
         const text = new PIXI.Text({
           text: "🔒", 

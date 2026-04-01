@@ -44,9 +44,9 @@ class RoomManager {
       hostId: socket.id,
       gamePhase: "waiting", // 'waiting' | 'prep' | 'playing' | 'ended'
       timeLeft: 0,
-      score: 0, // 흭득 점수
-      maxScore: 0, // 최종 목표 점수 (인원 비례)
-      items: [], // 드랍된 금괴 오브젝트 풀
+      score: 0, 
+      maxScore: 0, 
+      items: [], 
     };
 
     this.joinRoom(socket, roomId);
@@ -109,7 +109,7 @@ class RoomManager {
     }
 
     room.players[socket.id].team = targetTeam;
-    // 팀 변경 시 캐릭터도 해당 팀 기본 캐릭터로 변경
+    
     room.players[socket.id].characterId = targetTeam === "red" ? "DEFAULT_RUNNER" : "DEFAULT_TAGGER";
     this.io.to(roomId).emit("game:update", room.players);
   }
@@ -146,8 +146,11 @@ class RoomManager {
       return socket.emit("game:alert", "모든 플레이어가 준비 완료를 해야 합니다.");
 
     room.gamePhase = "prep";
-    room.timeLeft = 60; // 60초 진영공사 타임
+    room.timeLeft = 60; 
     room.score = 0;
+
+    const mapKeys = ["FOREST_VILLAGE", "DESERT_TEMPLE", "DARK_DUNGEON"];
+    room.currentMap = mapKeys[Math.floor(Math.random() * mapKeys.length)];
 
     assignItemsToPlayers(room);
 

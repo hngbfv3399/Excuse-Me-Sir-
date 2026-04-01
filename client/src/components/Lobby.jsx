@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import socket from "../hooks/useSocket";
 import CreateRoomModal from "./CreateRoomModal";
+import PasswordModal from "./PasswordModal";
 
 export default function Lobby({ nickname, onJoinSuccess }) {
   const [rooms, setRooms] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [selectedRoomForPassword, setSelectedRoomForPassword] = useState(null);
   
   useEffect(() => {
     socket.emit("rooms:request_list");
@@ -39,11 +41,16 @@ export default function Lobby({ nickname, onJoinSuccess }) {
 
   const handleJoin = (room) => {
     if (room.isPrivate) {
-      const pswd = prompt("비밀번호를 통과해야 입장할 수 있습니다:");
-      if (pswd === null) return; 
-      socket.emit("room:join", { roomId: room.id, password: pswd });
+      setSelectedRoomForPassword(room);
     } else {
       socket.emit("room:join", { roomId: room.id, password: "" });
+    }
+  };
+
+  const handlePasswordSubmit = (password) => {
+    if (selectedRoomForPassword) {
+      socket.emit("room:join", { roomId: selectedRoomForPassword.id, password });
+      setSelectedRoomForPassword(null);
     }
   };
 
@@ -93,6 +100,12 @@ export default function Lobby({ nickname, onJoinSuccess }) {
       </div>
 
       {showModal && <CreateRoomModal onClose={() => setShowModal(false)} onCreate={handleCreateRoom} />}
+      {selectedRoomForPassword && (
+        <PasswordModal 
+          onClose={() => setSelectedRoomForPassword(null)} 
+          onSubmit={handlePasswordSubmit} 
+        />
+      )}
     </div>
   );
 }

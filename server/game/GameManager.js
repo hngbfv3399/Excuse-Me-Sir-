@@ -60,7 +60,7 @@ class GameManager {
             });
             this.io.to(roomId).emit(
               "game:alert",
-              "🏆 의적 홍길동 무리가 금괴를 모두 훔쳐 승리했습니다!"
+              "🏆 레드팀이 승리했습니다!"
             );
           }
         }
@@ -112,7 +112,7 @@ class GameManager {
         });
         this.io.to(roomId).emit(
           "game:alert",
-          "🔥 탐관오리(술래)가 의적을 전원 감옥에 가뒀습니다!"
+          "🔥 블루팀이 승리했습니다!"
         );
       }
       this.io.to(roomId).emit("game:reset", room.players);

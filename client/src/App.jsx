@@ -1,26 +1,42 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import socket from "./hooks/useSocket";
 import Login from "./components/Login";
 import Lobby from "./components/Lobby";
 import GameCanvas from "./components/GameCanvas";
 import "./App.css";
 
+
 const GAME_W = 800;
 const GAME_H = 600;
 
 function useScale() {
   const [scale, setScale] = useState(1);
+  const [isPortrait, setIsPortrait] = useState(false);
+
   useEffect(() => {
     function calc() {
       const sw = window.innerWidth;
       const sh = window.innerHeight;
       setScale(Math.min(sw / GAME_W, sh / GAME_H, 1));
+      
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isMobileUA = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+      if (hasTouch && isMobileUA) {
+        setIsPortrait(sh > sw);
+      } else {
+        setIsPortrait(false);
+      }
     }
     calc();
+    const handleOrientation = () => setTimeout(calc, 100);
     window.addEventListener("resize", calc);
-    return () => window.removeEventListener("resize", calc);
+    window.addEventListener("orientationchange", handleOrientation);
+    return () => {
+      window.removeEventListener("resize", calc);
+      window.removeEventListener("orientationchange", handleOrientation);
+    };
   }, []);
-  return scale;
+  return { scale, isPortrait };
 }
 
 function App() {
@@ -28,7 +44,7 @@ function App() {
   const [nickname, setNickname] = useState("");
   const [roomId, setRoomId] = useState("");
   const [roomData, setRoomData] = useState(null);
-  const scale = useScale();
+  const { scale, isPortrait } = useScale();
 
   const handleLogin = (name) => {
     setNickname(name);
@@ -36,11 +52,11 @@ function App() {
     setScreen("LOBBY");
   };
 
-  const handleJoinSuccess = (joinedRoomId, rData) => {
+  const handleJoinSuccess = useCallback((joinedRoomId, rData) => {
     setRoomId(joinedRoomId);
     setRoomData(rData);
     setScreen("INGAME");
-  };
+  }, []);
 
   const handleLeaveRoom = () => {
     socket.emit("room:leave");
@@ -64,7 +80,17 @@ function App() {
         `}
       </style>
 
-      {/* 반응형 아케이드 프레임: scale로 어떤 화면에서도 800x600 비율 유지 */}
+      {isPortrait ? (
+        <div style={{
+          width: "100%", height: "100%", backgroundColor: "#0a0a0c", color: "#fff",
+          display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+          textAlign: "center", padding: "20px"
+        }}>
+          <div style={{ fontSize: "50px", marginBottom: "20px", transform: "rotate(-90deg)" }}>📱</div>
+          <h2>가로 모드로 회전해주세요</h2>
+          <p style={{ color: "#aaa", marginTop: "10px", lineHeight: "1.5" }}>기기를 눕혀야 정상적인 게임 플레이가 가능합니다.<br/>회전 후 자동으로 화면이 전환됩니다.</p>
+        </div>
+      ) : (
       <div style={{
         width: `${GAME_W}px`,
         height: `${GAME_H}px`,
@@ -82,6 +108,7 @@ function App() {
         {screen === "LOBBY" && <Lobby nickname={nickname} onJoinSuccess={handleJoinSuccess} />}
         {screen === "INGAME" && <GameCanvas initialRoomData={roomData} onLeave={handleLeaveRoom} />}
       </div>
+      )}
     </>
   );
 }

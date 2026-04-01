@@ -1,21 +1,15 @@
 import { useRef, useCallback, useState, useEffect } from "react";
 
-/**
- * MobileControls
- * - 왼쪽: 가상 조이스틱 (터치 드래그로 8방향 이동)
- * - 오른쪽: 아이템(Z) 버튼 + 스킬(Space) 버튼
- *
- * @param {Object} props
- * @param {Function} props.onJoystick  - ({ dx, dy }) 정규화된 방향벡터 (-1 ~ 1) 콜백
- * @param {Function} props.onItem      - 아이템 사용 버튼 콜백
- * @param {Function} props.onSkill     - 스킬 사용 버튼 콜백
- * @param {string|null} props.inventoryItem - 현재 보유 아이템 타입
- */
-export default function MobileControls({ onJoystick, onItem, onSkill, inventoryItem }) {
+
+export default function MobileControls({ onJoystick, onItem, onSkill, onRescueDown, onRescueUp, inventoryItem }) {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768 || /Mobi|Android/i.test(navigator.userAgent));
+    const checkMobile = () => {
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isMobileUA = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+      setIsMobile(hasTouch && isMobileUA);
+    };
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -47,12 +41,12 @@ export default function MobileControls({ onJoystick, onItem, onSkill, inventoryI
     const clampedDist = Math.min(dist, KNOB_LIMIT);
     const angle = Math.atan2(rawDy, rawDx);
 
-    // 노브 시각 이동
+    
     if (knobRef.current) {
       knobRef.current.style.transform = `translate(${Math.cos(angle) * clampedDist}px, ${Math.sin(angle) * clampedDist}px)`;
     }
 
-    // 정규화된 방향 벡터 전달
+    
     if (dist > 8) {
       onJoystick({ dx: Math.cos(angle), dy: Math.sin(angle) });
     } else {
@@ -81,7 +75,7 @@ export default function MobileControls({ onJoystick, onItem, onSkill, inventoryI
 
   return (
     <div style={styles.overlay}>
-      {/* ===== 왼쪽: 조이스틱 ===== */}
+      
       <div style={styles.joystickArea}>
         <div
           ref={baseRef}
@@ -95,23 +89,32 @@ export default function MobileControls({ onJoystick, onItem, onSkill, inventoryI
         </div>
       </div>
 
-      {/* ===== 오른쪽: 아이템 + 스킬 버튼 ===== */}
+      
       <div style={styles.actionArea}>
-        {/* 스킬 버튼 (위) */}
-        <button
-          style={{ ...styles.actionBtn, ...styles.skillBtn }}
-          onTouchStart={(e) => { e.preventDefault(); onSkill(); }}
-        >
-          <span style={styles.btnIcon}>⚡</span>
-          <span style={styles.btnLabel}>스킬</span>
-          <span style={styles.btnHint}>준비중</span>
-        </button>
-
-        {/* 아이템 버튼 (아래) */}
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button
+            style={{ ...styles.actionBtn, ...styles.skillBtn, width: "60px", height: "60px" }}
+            onTouchStart={(e) => { e.preventDefault(); onSkill(); }}
+          >
+            <span style={styles.btnIcon}>⚡</span>
+            <span style={{ fontSize: "10px", fontWeight: "bold", color: "#FFD700" }}>스킬</span>
+          </button>
+          <button
+            style={{ ...styles.actionBtn, ...styles.rescueBtn, width: "60px", height: "60px" }}
+            onTouchStart={(e) => { e.preventDefault(); onRescueDown(); }}
+            onTouchEnd={(e) => { e.preventDefault(); onRescueUp(); }}
+            onTouchCancel={(e) => { e.preventDefault(); onRescueUp(); }}
+          >
+            <span style={styles.btnIcon}>✋</span>
+            <span style={{ fontSize: "10px", fontWeight: "bold", color: "#FFD700" }}>구출/행동</span>
+          </button>
+        </div>
+        
         <button
           style={{
             ...styles.actionBtn,
             ...styles.itemBtn,
+            width: "70px", height: "70px",
             borderColor: itemLabel ? "#FFD700" : "#555",
             boxShadow: itemLabel ? "0 0 14px rgba(255,215,0,0.5)" : "none",
             opacity: itemLabel ? 1 : 0.5,
@@ -119,9 +122,8 @@ export default function MobileControls({ onJoystick, onItem, onSkill, inventoryI
           onTouchStart={(e) => { e.preventDefault(); if (itemLabel) onItem(); }}
           disabled={!itemLabel}
         >
-          <span style={styles.btnIcon}>{itemLabel ? itemLabel.icon : "🎒"}</span>
-          <span style={styles.btnLabel}>{itemLabel ? itemLabel.label : "없음"}</span>
-          <span style={styles.btnHint}>아이템</span>
+          <span style={{ fontSize: "22px" }}>{itemLabel ? itemLabel.icon : "🎒"}</span>
+          <span style={{ fontSize: "12px", fontWeight: "bold", color: "#FFD700" }}>{itemLabel ? itemLabel.label : "없음"}</span>
         </button>
       </div>
     </div>
@@ -131,14 +133,14 @@ export default function MobileControls({ onJoystick, onItem, onSkill, inventoryI
 const styles = {
   overlay: {
     position: "absolute", bottom: 0, left: 0, right: 0,
-    height: "160px",             // 모바일 조작 패드 높이
+    height: "160px",             
     display: "flex", justifyContent: "space-between", alignItems: "center",
     padding: "0 20px 12px 20px",
-    pointerEvents: "none",       // 캔버스 클릭 통과 (버튼만 포인터 이벤트 받음)
+    pointerEvents: "none",       
     zIndex: 200,
   },
 
-  // 왼쪽 조이스틱 영역
+  
   joystickArea: {
     display: "flex", justifyContent: "center", alignItems: "center",
     pointerEvents: "auto",
@@ -161,7 +163,7 @@ const styles = {
     pointerEvents: "none",
   },
 
-  // 오른쪽 버튼 영역
+  
   actionArea: {
     display: "flex", flexDirection: "column", gap: "10px",
     justifyContent: "center", alignItems: "center",
@@ -178,10 +180,14 @@ const styles = {
     color: "white",
   },
   skillBtn: {
-    width: "58px", height: "58px",
     backgroundColor: "rgba(80,80,180,0.7)",
     borderColor: "#7986cb",
     boxShadow: "0 0 10px rgba(121,134,203,0.4)",
+  },
+  rescueBtn: {
+    backgroundColor: "rgba(50,150,50,0.7)",
+    borderColor: "#81C784",
+    boxShadow: "0 0 10px rgba(129,199,132,0.4)",
   },
   itemBtn: {
     backgroundColor: "rgba(0,0,0,0.7)",

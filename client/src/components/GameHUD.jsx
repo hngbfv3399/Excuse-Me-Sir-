@@ -9,7 +9,9 @@ export default function GameHUD({
   isHost,
   handleJoystick,
   handleMobileItem,
-  handleMobileSkill
+  handleMobileSkill,
+  handleRescueDown,
+  handleRescueUp
 }) {
   const timerInfo = useGameStore((state) => state.timerInfo);
   const scoreInfo = useGameStore((state) => state.scoreInfo);
@@ -40,7 +42,7 @@ export default function GameHUD({
         ← 게임 탈주 (나가기)
       </button>
 
-      {/* 화면 최상단 타이머 UI */}
+      
       {timerInfo.gamePhase !== "waiting" && (
         <>
           <div style={{
@@ -68,7 +70,7 @@ export default function GameHUD({
         </>
       )}
 
-      {/* 구출 캐스팅(Progress) 바 UI */}
+      
       {rescueProgress > 0 && (
         <div style={{
           position: "absolute", top: "65%", left: "50%", transform: "translateX(-50%)",
@@ -89,7 +91,7 @@ export default function GameHUD({
         </div>
       )}
 
-      {/* 게임 종료 리플레이 오버레이 */}
+      
       {timerInfo.gamePhase === "ended" && (
          <div style={{
           position: "absolute", top: 0, left: 0, right: 0, bottom: 0,
@@ -112,7 +114,7 @@ export default function GameHUD({
         </div>
       )}
 
-      {/* 🎒 아이템 HUD - 좌하단 */}
+      
       {timerInfo.gamePhase === "playing" && (
         <div style={{
           position: "absolute", bottom: 20, left: 20, zIndex: 50,
@@ -146,12 +148,14 @@ export default function GameHUD({
         </div>
       )}
 
-      {/* 🎮 모바일 전용 조이스틱 + 액션 버튼 오버레이 */}
+      
       {(timerInfo.gamePhase === "playing" || timerInfo.gamePhase === "prep") && (
         <MobileControls
           onJoystick={handleJoystick}
           onItem={handleMobileItem}
           onSkill={handleMobileSkill}
+          onRescueDown={handleRescueDown}
+          onRescueUp={handleRescueUp}
           inventoryItem={inventoryItem}
         />
       )}

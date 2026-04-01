@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 export default function WaitingRoom({ socket, room, myId, onLeave }) {
   const [errorLine, setErrorLine] = useState("");
   
-  // 서버로부터 경고 알림 구독
+  
   useEffect(() => {
     const handleAlert = (msg) => {
       setErrorLine(msg);
@@ -112,9 +112,8 @@ export default function WaitingRoom({ socket, room, myId, onLeave }) {
       <div style={styles.errorText}>{errorLine}</div>
 
       <div style={styles.teamContainer}>
-        {/* 의적 홍길동 팀 (공격) */}
         <div style={styles.teamBox("red")}>
-          <h3 style={styles.teamHeader("red")}>🔴 의적 홍길동 팀 (공격) [{redTeam.length} / {room.maxPlayers/2}]</h3>
+          <h3 style={styles.teamHeader("red")}>🔴 레드팀 [{redTeam.length} / {room.maxPlayers/2}]</h3>
           {redTeam.map(([id, p]) => (
             <div key={id} style={styles.playerRow(id === myId)}>
               <span>{p.nickname} {id === room.hostId && "👑"}</span>
@@ -123,14 +122,13 @@ export default function WaitingRoom({ socket, room, myId, onLeave }) {
           ))}
           {myTeam !== "red" && (
              <button style={styles.joinBtn} onClick={() => handleTeamChange("red")} onMouseOver={e => e.target.style.backgroundColor="rgba(255,255,255,0.2)"} onMouseOut={e => e.target.style.backgroundColor="rgba(255,255,255,0.1)"}>
-               의적 홍길동 팀으로 이동 ➔
+               레드팀으로 이동 ➔
              </button>
           )}
         </div>
 
-        {/* 탐관오리 팀 (수비) */}
         <div style={styles.teamBox("blue")}>
-          <h3 style={styles.teamHeader("blue")}>🔵 탐관오리 팀 (수비) [{blueTeam.length} / {room.maxPlayers/2}]</h3>
+          <h3 style={styles.teamHeader("blue")}>🔵 블루팀 [{blueTeam.length} / {room.maxPlayers/2}]</h3>
           {blueTeam.map(([id, p]) => (
             <div key={id} style={styles.playerRow(id === myId)}>
               <span>{p.nickname} {id === room.hostId && "👑"}</span>
@@ -139,7 +137,7 @@ export default function WaitingRoom({ socket, room, myId, onLeave }) {
           ))}
           {myTeam !== "blue" && (
              <button style={styles.joinBtn} onClick={() => handleTeamChange("blue")} onMouseOver={e => e.target.style.backgroundColor="rgba(255,255,255,0.2)"} onMouseOut={e => e.target.style.backgroundColor="rgba(255,255,255,0.1)"}>
-               탐관오리 팀으로 이동 ➔
+               블루팀으로 이동 ➔
              </button>
           )}
         </div>

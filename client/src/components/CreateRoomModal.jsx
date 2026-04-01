@@ -36,7 +36,7 @@ export default function CreateRoomModal({ onClose, onCreate }) {
           </div>
           <div style={styles.field}>
             <label>1인당 목표 금괴 (기본: 2개)</label>
-            <select style={styles.input} value={targetQuota} onChange={e => setTargetQuota(e.target.value)}>
+            <select style={styles.input} value={targetQuota} onChange={e => setTargetQuota(parseInt(e.target.value, 10))}>
               <option value={1}>1개 (빠른 모드)</option>
               <option value={2}>2개 (보통)</option>
               <option value={3}>3개 (어려움)</option>

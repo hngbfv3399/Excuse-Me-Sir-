@@ -52,22 +52,22 @@ describe("RoomManager", () => {
 
     expect(p1.team).toBeDefined();
     expect(p2.team).toBeDefined();
-    expect(p1.team !== p2.team).toBe(true); // 반드시 다른 팀이어야 함
+    expect(p1.team !== p2.team).toBe(true); 
   });
 
   test("다인큐방에서 혼자 시작하려고 하면 거부되어야 한다 (자동시작 및 인원 검증)", () => {
     const rm = new RoomManager(io, rooms, socketIdToRoom, socketIdToNickname);
     rm.handleCreateRoom(socket1, { title: "Test", maxPlayers: 4 });
     
-    // 혼자 있을 때 시작 요청
+    
     rm.handleStart(socket1);
     
-    // 알람이 발생해야 하며, 에러 메세지가 반환되어야 함
+    
     const alertEvent = emittedEvents.find(e => e.event === "game:alert");
     expect(alertEvent).toBeDefined();
     expect(alertEvent.data).toContain("양 팀에 최소 1명");
     
-    // 게임은 여전히 시작되지 않고 waiting 이어야 함
+    
     const roomId = Object.keys(rooms)[0];
     expect(rooms[roomId].gamePhase).toBe("waiting");
   });
@@ -78,14 +78,14 @@ describe("RoomManager", () => {
     const roomId = Object.keys(rooms)[0];
     rm.handleJoinRoom(socket2, { roomId });
 
-    // socket2 (테스터) 가 준비(Ready)를 안 한 상태
+    
     rm.handleStart(socket1);
 
     const alertEvent = emittedEvents.filter(e => e.event === "game:alert").pop();
     expect(alertEvent).toBeDefined();
     expect(alertEvent.data).toContain("모든 플레이어가 준비 완료");
 
-    // socket2 가 준비 완료 후 다시 시작 시도
+    
     rooms[roomId].players["socket_2"].isReady = true;
     rm.handleStart(socket1);
 

@@ -19,17 +19,17 @@ const io = new Server(server, {
   transports: ["websocket", "polling"],
 });
 
-// 글로벌 다중 룸 상태 저장소 (In-memory)
+
 let rooms = {};
 let socketIdToRoom = {};
 let socketIdToNickname = {};
 
-// Manager 객체 인스턴스화
+
 const roomManager = new RoomManager(io, rooms, socketIdToRoom, socketIdToNickname);
 const gameManager = new GameManager(io, rooms, socketIdToRoom);
 
 io.on("connection", (socket) => {
-  // 로비 및 대기방 관리 이벤트
+  
   socket.on("user:login", (nickname) => roomManager.handleLogin(socket, nickname));
   socket.on("rooms:request_list", () => roomManager.handleRequestList());
   socket.on("room:create", (roomData) => roomManager.handleCreateRoom(socket, roomData));
@@ -39,18 +39,18 @@ io.on("connection", (socket) => {
   socket.on("room:ready", () => roomManager.handleReady(socket));
   socket.on("room:start", () => roomManager.handleStart(socket));
   
-  // 인게임 로직 및 물리 이벤트
+  
   socket.on("player:move", (data) => gameManager.handlePlayerMove(socket, data));
   socket.on("rescue:start", () => gameManager.handleRescueStart(socket));
   socket.on("rescue:complete", () => gameManager.handleRescueComplete(socket));
   socket.on("item:use", () => gameManager.handleItemUse(socket));
   
-  // 접속 해제
+  
   socket.on("room:leave", () => roomManager.leaveRoom(socket));
   socket.on("disconnect", () => roomManager.leaveRoom(socket));
 });
 
-// 글로벌 게임 타이머 및 상태 감시 루프
+
 gameManager.startGlobalTimerLoop();
 
 app.use((req, res) => {
