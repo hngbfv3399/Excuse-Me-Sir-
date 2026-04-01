@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import socket from "../hooks/useSocket";
 import { useKeyboard } from "../hooks/useKeyboard";
 import { PixiEngine } from "../renderer/engine";
+import { MAPS } from "../gameData/maps";
 import WaitingRoom from "./WaitingRoom";
 import GameHUD from "./GameHUD";
 
@@ -60,10 +61,10 @@ export default function GameCanvas({ initialRoomData, onLeave }) {
     let animationId;
 
     function gameLoop() {
-      // 1. 물리 틱 업데이트 (충돌, 입력, 패킷 발송 등)
+      
       updatePhysics();
 
-      // 2. 렌더 코어 업데이트
+      
       const players = playersRef.current;
       const mId = myIdRef.current;
       
@@ -78,7 +79,7 @@ export default function GameCanvas({ initialRoomData, onLeave }) {
     return () => cancelAnimationFrame(animationId);
   }, [updatePhysics, timerInfo.gamePhase]);
 
-  // 모바일 콜백 함수
+  
   const handleJoystick = useCallback(({ dx, dy }) => {
     joystickDirRef.current = { dx, dy };
   }, []);
@@ -88,6 +89,12 @@ export default function GameCanvas({ initialRoomData, onLeave }) {
   const handleMobileSkill = useCallback(() => {
     // TODO: 스킬 연결 예정
   }, []);
+  const handleRescueDown = useCallback(() => {
+    keys.current[" "] = true;
+  }, [keys]);
+  const handleRescueUp = useCallback(() => {
+    delete keys.current[" "];
+  }, [keys]);
 
   if (isWaiting) {
     return (
@@ -109,13 +116,15 @@ export default function GameCanvas({ initialRoomData, onLeave }) {
         handleJoystick={handleJoystick}
         handleMobileItem={handleMobileItem}
         handleMobileSkill={handleMobileSkill}
+        handleRescueDown={handleRescueDown}
+        handleRescueUp={handleRescueUp}
       />
 
       <canvas
         ref={canvasRef}
         width={800}
         height={600}
-        style={{ display: "block" }}
+        style={{ display: "block", backgroundColor: roomInfo?.currentMap ? MAPS[roomInfo.currentMap]?.background : "#1a1a1a" }}
       />
       
     </div>

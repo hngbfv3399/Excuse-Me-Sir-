@@ -25,7 +25,7 @@ export function updateEntities(entityContainer, players, myId, items, traps, bas
     frame: new PIXI.Rectangle(tx * (TS + GAP), ty * (TS + GAP), TS, TS)
   });
 
-  // 1. 금괴(아이템) 업데이트
+  
   const currentItemIds = new Set(items.map(i => i.id));
   Object.keys(spriteCache.items).forEach(id => {
     if (!currentItemIds.has(id)) {
@@ -49,7 +49,7 @@ export function updateEntities(entityContainer, players, myId, items, traps, bas
     sprite.y = item.y + 10;
   });
 
-  // 2. 플레이어 업데이트
+  
   const currentPlayerIds = new Set(Object.keys(players));
   Object.keys(spriteCache.players).forEach(id => {
     if (!currentPlayerIds.has(id)) {
@@ -64,7 +64,7 @@ export function updateEntities(entityContainer, players, myId, items, traps, bas
   Object.keys(players).forEach(id => {
     const p = players[id];
     
-    // 은신 처리 (적군의 은신은 아예 안 보이도록 렌더링에서 스킵)
+    
     let isVisible = true;
     if (p.isStealth && me && p.team !== me.team) {
       isVisible = false;
@@ -82,7 +82,7 @@ export function updateEntities(entityContainer, players, myId, items, traps, bas
       sprite.name = "character";
       pContainer.addChild(sprite);
 
-      // 감옥 오버레이 박스 (평소엔 hidden)
+      
       const jailBox = new PIXI.Graphics();
       jailBox.name = "jailBox";
       pContainer.addChild(jailBox);
@@ -104,7 +104,7 @@ export function updateEntities(entityContainer, players, myId, items, traps, bas
     pContainer.visible = isVisible;
     if (!isVisible) return; 
 
-    // 부드러운 위치 갱신 (10은 캐릭터 20x20 크기의 중심점 오프셋)
+    
     pContainer.x = p.x + 10;
     pContainer.y = p.y + 10;
     
