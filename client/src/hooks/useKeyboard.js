@@ -5,9 +5,11 @@ export function useKeyboard() {
 
   useEffect(() => {
     const down = (e) => {
+      keys.current[e.code] = true;
       keys.current[e.key] = true;
     };
     const up = (e) => {
+      keys.current[e.code] = false;
       keys.current[e.key] = false;
     };
 

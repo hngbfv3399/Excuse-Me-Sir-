@@ -12,7 +12,8 @@ const TILE_MAP = {
   JAIL_DOOR: { tx: 9, ty: 9 },
 };
 
-export function setupMapLayer(mapContainer, baseTexture) {
+export function setupMapLayer(mapContainer, baseTexture, customMap = null) {
+  const mapData = customMap || MAP;
   
   const getTexture = (tx, ty) => {
     return new PIXI.Texture({
@@ -29,8 +30,7 @@ export function setupMapLayer(mapContainer, baseTexture) {
     JAIL_DOOR: getTexture(TILE_MAP.JAIL_DOOR.tx, TILE_MAP.JAIL_DOOR.ty),
   };
 
-  
-  MAP.forEach((row, y) => {
+  mapData.forEach((row, y) => {
     row.forEach((tile, x) => {
       let tex = textures.FLOOR;
       let isDoor = false;
@@ -51,7 +51,6 @@ export function setupMapLayer(mapContainer, baseTexture) {
       
       mapContainer.addChild(sprite);
 
-      
       if (isDoor) {
         const text = new PIXI.Text({
           text: "🔒", 

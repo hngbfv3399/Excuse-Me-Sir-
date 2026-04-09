@@ -32,14 +32,23 @@ for (let y = 3; y < 37; y++) {
 for (let y = 3; y <= 9; y++) {
   for (let x = 3; x <= 9; x++) {
     if (x === 3 || x === 9 || y === 3 || y === 9) {
-      MAP[y][x] = TILE.WALL;
+      if (x === 9 && (y === 6 || y === 7)) {
+         MAP[y][x] = TILE.SAFE_FLOOR; // 문 개방
+      } else {
+        MAP[y][x] = TILE.WALL;
+      }
     } else {
       MAP[y][x] = TILE.SAFE_FLOOR;
     }
   }
 }
-MAP[6][9] = TILE.SAFE_FLOOR; 
-MAP[6][6] = TILE.SAFE_FLOOR; 
+
+// 스폰킬 방지용 안전 구역 확장 (SAFE_FLOOR)
+for(let y = 5; y <= 8; y++) {
+    for(let x = 10; x <= 12; x++) {
+        MAP[y][x] = TILE.SAFE_FLOOR;
+    }
+}
 
 MAP[5][12] = TILE.FLOOR; 
 MAP[6][12] = TILE.FLOOR;

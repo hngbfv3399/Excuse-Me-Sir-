@@ -1,11 +1,11 @@
-import { MAP, TILE, TILE_SIZE } from "../constants/map";
+import { MAP as DEFAULT_MAP, TILE, TILE_SIZE } from "../constants/map";
 
-export function isWall(x, y, isTagger = false) {
+export function isWall(x, y, isTagger = false, customMap = null) {
+  const MAP = customMap || DEFAULT_MAP;
   
   const width = 20;
   const height = 20;
 
-  
   const margin = 0.001;
 
   const left = x + margin;
@@ -13,7 +13,6 @@ export function isWall(x, y, isTagger = false) {
   const top = y + margin;
   const bottom = y + height - margin;
 
-  
   const points = [
     { px: left, py: top },
     { px: right, py: top },
