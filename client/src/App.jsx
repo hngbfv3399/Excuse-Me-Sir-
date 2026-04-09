@@ -3,6 +3,7 @@ import socket from "./hooks/useSocket";
 import Login from "./components/Login";
 import Lobby from "./components/Lobby";
 import GameCanvas from "./components/GameCanvas";
+import SandboxCanvas from "./components/SandboxCanvas";
 import "./App.css";
 
 
@@ -40,7 +41,7 @@ function useScale() {
 }
 
 function App() {
-  const [screen, setScreen] = useState("LOGIN"); 
+  const [screen, setScreen] = useState(window.location.pathname === "/test" ? "SANDBOX" : "LOGIN"); 
   const [nickname, setNickname] = useState("");
   const [roomId, setRoomId] = useState("");
   const [roomData, setRoomData] = useState(null);
@@ -104,9 +105,10 @@ function App() {
         boxShadow: "0 0 50px rgba(0,0,0,0.8)",
         flexShrink: 0,
       }}>
-        {screen === "LOGIN" && <Login onLogin={handleLogin} />}
+        {screen === "LOGIN" && <Login onLogin={handleLogin} onSandbox={() => setScreen("SANDBOX")} />}
         {screen === "LOBBY" && <Lobby nickname={nickname} onJoinSuccess={handleJoinSuccess} />}
         {screen === "INGAME" && <GameCanvas initialRoomData={roomData} onLeave={handleLeaveRoom} />}
+        {screen === "SANDBOX" && <SandboxCanvas onLeave={() => setScreen("LOGIN")} />}
       </div>
       )}
     </>

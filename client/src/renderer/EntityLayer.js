@@ -79,12 +79,18 @@ export function updateEntities(entityContainer, players, myId, items, traps, bas
       sprite.width = isBig ? 28 : 24;
       sprite.height = isBig ? 28 : 24;
       sprite.anchor.set(0.5);
-      sprite.name = "character";
+      sprite.label = "character";
       pContainer.addChild(sprite);
 
-      
+      // 텍스처가 투명하거나 깨졌을 경우를 대비한 강제 표시 (디버그)
+      const debugGraphic = new PIXI.Graphics();
+      debugGraphic.circle(0, 0, 30); // 눈에 띄게 큰 원!
+      debugGraphic.fill({ color: p.isTagger ? 0x2196f3 : 0xff5252, alpha: 1.0 });
+      debugGraphic.stroke({ color: 0xffffff, width: 3 });
+      pContainer.addChild(debugGraphic);
+
       const jailBox = new PIXI.Graphics();
-      jailBox.name = "jailBox";
+      jailBox.label = "jailBox";
       pContainer.addChild(jailBox);
 
       const nameText = new PIXI.Text({
@@ -93,7 +99,7 @@ export function updateEntities(entityContainer, players, myId, items, traps, bas
       });
       nameText.y = -22;
       nameText.anchor.set(0.5, 1);
-      nameText.name = "label";
+      nameText.label = "label";
       pContainer.addChild(nameText);
 
       entityContainer.addChild(pContainer);
@@ -104,13 +110,44 @@ export function updateEntities(entityContainer, players, myId, items, traps, bas
     pContainer.visible = isVisible;
     if (!isVisible) return; 
 
-    
     pContainer.x = p.x + 10;
     pContainer.y = p.y + 10;
+
+    // 액션 상태 그리기
+    let actionIndicator = pContainer.getChildByLabel("actionIndicator");
+    if (!actionIndicator) {
+      actionIndicator = new PIXI.Graphics();
+      actionIndicator.label = "actionIndicator";
+      pContainer.addChild(actionIndicator);
+    }
+    
+    actionIndicator.clear();
+    
+    if (p.action === 'FARMING' && p.actionProgress > 0) {
+      // 5초 게이지바 UI (노란색)
+      actionIndicator.rect(-20, -50, 40, 8);
+      actionIndicator.fill({ color: 0x333333 });
+      const pct = Math.min(1, p.actionProgress / 300);
+      actionIndicator.rect(-20, -50, 40 * pct, 8);
+      actionIndicator.fill({ color: 0xffd700 }); 
+    } else if (p.action === 'SKILL') {
+      // 스킬 사용 원형 오라 (아우라)
+      actionIndicator.circle(0, 0, 45);
+      actionIndicator.stroke({ color: p.isTagger ? 0x00ffff : 0xffa500, width: 4 });
+    } else if (p.action === 'ITEM') {
+      // 아이템 사용 효과 (머리 위 십자가 마크)
+      actionIndicator.rect(-5, -60, 10, 25);
+      actionIndicator.rect(-12, -52, 24, 10);
+      actionIndicator.fill({ color: 0x00ff00 });
+    } else if (p.action === 'TRAP') {
+      // 함정 설치 시각 범위 표시
+      actionIndicator.rect(-30, -30, 60, 60);
+      actionIndicator.stroke({ color: 0xff0000, width: 3, alpha: 0.8 });
+    }
     
     pContainer.alpha = p.isStealth ? 0.4 : 1.0;
 
-    const label = pContainer.getChildByName("label");
+    const label = pContainer.getChildByLabel("label");
     let labelText = p.nickname || "User";
     if (p.isTagger) labelText = "블루팀";
     else if (p.carriedItem) labelText = `🥇 ${p.nickname}`;
@@ -125,7 +162,7 @@ export function updateEntities(entityContainer, players, myId, items, traps, bas
     }
     label.text = labelText;
 
-    const jailBox = pContainer.getChildByName("jailBox");
+    const jailBox = pContainer.getChildByLabel("jailBox");
     if (p.isJailed) {
       jailBox.clear();
       jailBox.rect(-12, -12, 24, 24);
